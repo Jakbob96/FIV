@@ -1,0 +1,67 @@
+/*
+Code from -> https://msdn.microsoft.com/en-us/data/jj193542
+changes by Jakob Menzel
+*/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.Entity;
+
+namespace CatDatabase
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            using (var db = new CatContext())
+            {
+                // Create and save a new Cat 
+                Console.Write("Enter a name for a new Cat: ");
+                var name = Console.ReadLine();
+
+                var cat = new Cat { Name = name };
+                db.Cats.Add(cat);
+                db.SaveChanges();
+
+                // Display all Cats from the database 
+                var query = from b in db.Cats
+                            orderby b.Name
+                            select b;
+
+                Console.WriteLine("All cats in the database:");
+                foreach (var item in query)
+                {
+                    Console.WriteLine(item.Name);
+                }
+
+                Console.WriteLine("Press any key to exit...");
+                Console.ReadKey();
+            } 
+        }
+    }
+
+    public class Cat
+    {
+        public int CatId { get; set; }
+        public string Name { get; set; }
+
+        public virtual List<Kitten> Kittens { get; set; }
+    }
+
+    public class Kitten
+    {
+        public int KittenId { get; set; }
+        public string Name { get; set; }
+
+        public int CatId { get; set; }
+        public virtual Cat Cat { get; set; }
+    }
+
+    public class CatContext : DbContext
+    {
+        public DbSet<Cat> Cats { get; set; }
+        public DbSet<Kitten> Kittens { get; set; }
+    }
+}
